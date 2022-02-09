@@ -15,8 +15,7 @@ class SHOOTERUE_API UPlayerAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	void UpdateAnimationProperties(float Deltatime);
+	virtual void NativeUpdateAnimation(float DeltaTimeX) override;
 
 	virtual void NativeInitializeAnimation() override;
 

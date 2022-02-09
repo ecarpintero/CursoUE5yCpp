@@ -5,13 +5,10 @@
 #include "PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-void UPlayerAnimInstance::NativeInitializeAnimation() {
-	Super::NativeInitializeAnimation();
+void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
+{
+	Super::NativeUpdateAnimation(DeltaTimeX);
 
-	PlayerCharacter = Cast<APlayerCharacter>(TryGetPawnOwner());
-}
-
-void UPlayerAnimInstance::UpdateAnimationProperties(float Deltatime) {
 	if (PlayerCharacter == nullptr) {
 		PlayerCharacter = Cast<APlayerCharacter>(TryGetPawnOwner());
 	}
@@ -22,13 +19,19 @@ void UPlayerAnimInstance::UpdateAnimationProperties(float Deltatime) {
 
 		bIsInAir = PlayerCharacter->GetCharacterMovement()->IsFalling();
 
-		/*if (PlayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f) {
+		if (PlayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f) {
 			bIsAccelerating = true;
 		}
 		else {
 			bIsAccelerating = false;
-		}*/
+		}
 
-		bIsAccelerating = (PlayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f);
+		//bIsAccelerating = (PlayerCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.0f);
 	}
+}
+
+void UPlayerAnimInstance::NativeInitializeAnimation() {
+	Super::NativeInitializeAnimation();
+
+	PlayerCharacter = Cast<APlayerCharacter>(TryGetPawnOwner());
 }
