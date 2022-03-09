@@ -4,6 +4,7 @@
 #include "ShooterUEGameModeBase.h"
 
 #include "PlayerCharacter.h"
+#include "ShooterHUD.h"
 
 AShooterUEGameModeBase::AShooterUEGameModeBase()
 {
@@ -13,4 +14,5 @@ AShooterUEGameModeBase::AShooterUEGameModeBase()
 	{
 		DefaultPawnClass = PlayerCharacterBP.Class;
 	}
+	HUDClass = AShooterHUD::StaticClass();
 }

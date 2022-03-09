@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Sound/SoundCue.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -23,7 +24,17 @@ private:
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
 	float BaseLookUpRate;
-
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Sound, meta=(AllowPrivateAccess = "true"))
+	USoundCue* FireSound;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Animation, meta=(AllowPrivateAccess = "true"))
+	UAnimMontage* FireAnimMontage;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=FX, meta=(AllowPrivateAccess = "true"))
+	UParticleSystem* ImpactParticles;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=FX, meta=(AllowPrivateAccess = "true"))
+	UParticleSystem* MuzzlesParticles;
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=FX, meta=(AllowPrivateAccess = "true"))
+	UParticleSystem* BeamParticles;
+	
 public:
 	// Constructor
 	APlayerCharacter();
@@ -39,6 +50,13 @@ protected:
 	void TurnAtRate(float Rate);
 	//Rotacion horizontal de la camara
 	void LookAtRate(float Rate);
+	void Fire();
+
+	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult);
+	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& OutHitLocation);
+
+private:
+	void FireLineCast(FName SocketName);
 
 public:	
 	// Called every frame
