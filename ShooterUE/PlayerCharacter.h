@@ -34,6 +34,16 @@ private:
 	UParticleSystem* MuzzlesParticles;
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=FX, meta=(AllowPrivateAccess = "true"))
 	UParticleSystem* BeamParticles;
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
+	bool bAiming;
+
+	float CameraDeafultFOV;
+	float CameraZoomedFOV;
+	float CameraCurrentFOV;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Camera,meta=(AllowPrivateAccess="true"))
+	float SpeedZoomed;
 	
 public:
 	// Constructor
@@ -55,6 +65,11 @@ protected:
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult);
 	bool TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& OutHitLocation);
 
+	void AiminButtonPressed();
+	void AiminButtonReleased();
+
+	void CameraInterpZoom(float DeltaTime);
+
 private:
 	void FireLineCast(FName SocketName);
 
@@ -65,6 +80,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
+	bool GetAiming() const{ return bAiming;}
 
 };

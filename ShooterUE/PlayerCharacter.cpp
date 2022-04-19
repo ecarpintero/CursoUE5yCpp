@@ -13,16 +13,17 @@
 // Sets default values
 APlayerCharacter::APlayerCharacter() :
 	//Valores por defecto de las variables
-	BaseTurnRate(45.f),BaseLookUpRate(45.f)
+	BaseTurnRate(45.f),BaseLookUpRate(45.f),CameraZoomedFOV(35.f),SpeedZoomed(20)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	//Creamos los componetes y asignamos valores por defecto
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300;
+	CameraBoom->TargetArmLength = 180;
 	//Rota el personaje cuando rota el SpringArmComponent
 	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->SocketOffset = FVector(0,50,70);
 	//Camara del jeugo
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	//Lo unimos al SpringArmComponent
@@ -40,6 +41,12 @@ APlayerCharacter::APlayerCharacter() :
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(FollowCamera)
+	{
+		CameraDeafultFOV= FollowCamera->FieldOfView;
+		CameraCurrentFOV = CameraDeafultFOV;
+	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -158,6 +165,31 @@ bool APlayerCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& O
 	return false;
 }
 
+void APlayerCharacter::AiminButtonPressed()
+{
+	bAiming = true;
+}
+
+void APlayerCharacter::AiminButtonReleased()
+{
+	bAiming = false;
+}
+
+void APlayerCharacter::CameraInterpZoom(float DeltaTime)
+{
+	if(FollowCamera)
+	{
+		if(bAiming)
+		{
+			CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV,CameraZoomedFOV,DeltaTime,SpeedZoomed);
+		}else
+		{
+			CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV,CameraDeafultFOV,DeltaTime,SpeedZoomed);
+		}
+		FollowCamera->SetFieldOfView(CameraCurrentFOV);
+	}
+}
+
 void APlayerCharacter::FireLineCast(FName SocketName)
 {
 	const USkeletalMeshSocket* Fire_Socket = GetMesh()->GetSocketByName(SocketName);
@@ -214,7 +246,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-
+	CameraInterpZoom(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -237,6 +269,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Jump",IE_Released,this,&ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("Fire",IE_Pressed,this,&APlayerCharacter::Fire);
+
+	PlayerInputComponent->BindAction("AiminButton",IE_Pressed,this,&APlayerCharacter::AiminButtonPressed);
+	PlayerInputComponent->BindAction("AiminButton",IE_Released,this,&APlayerCharacter::AiminButtonReleased);
 
 }
 

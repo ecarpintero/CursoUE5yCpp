@@ -38,6 +38,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaTimeX)
 		{
 			LastMovementOffsetYaw = MovementOffsetYaw;
 		}
+
+		bAiming = PlayerCharacter->GetAiming();
 	}
 }
 
