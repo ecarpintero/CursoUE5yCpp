@@ -24,6 +24,25 @@ private:
 	float BaseTurnRate;
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
 	float BaseLookUpRate;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float HipTurnRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float HipLookUpRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float AimingTurnRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"))
+	float AimingLookUpRate;
+
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"),meta=(ClampMin="0.0",ClampMax="1.0",UIMin="0.0",UIMax="1.0"))
+	float MouseHipTurnRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"),meta=(ClampMin="0.0",ClampMax="1.0",UIMin="0.0",UIMax="1.0"))
+	float MouseHipLookUpRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"),meta=(ClampMin="0.0",ClampMax="1.0",UIMin="0.0",UIMax="1.0"))
+	float MouseAimingTurnRate;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category=Camera, meta=(AllowPrivateAccess = "true"),meta=(ClampMin="0.0",ClampMax="1.0",UIMin="0.0",UIMax="1.0"))
+	float MouseAimingLookUpRate;
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Sound, meta=(AllowPrivateAccess = "true"))
 	USoundCue* FireSound;
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Animation, meta=(AllowPrivateAccess = "true"))
@@ -44,7 +63,18 @@ private:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category=Camera,meta=(AllowPrivateAccess="true"))
 	float SpeedZoomed;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	float CrosshairsSpreadMultiplier;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	float CrosshairsVelocityFactor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	float CrosshairsAirFactor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	float CrosshairsInAimFactor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
+	float CrosshairsShootingFactor;
+
 public:
 	// Constructor
 	APlayerCharacter();
@@ -60,6 +90,10 @@ protected:
 	void TurnAtRate(float Rate);
 	//Rotacion horizontal de la camara
 	void LookAtRate(float Rate);
+
+	void Turn(float Value);
+	void LookUp(float Value);
+	
 	void Fire();
 
 	bool GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult);
@@ -69,17 +103,19 @@ protected:
 	void AiminButtonReleased();
 
 	void CameraInterpZoom(float DeltaTime);
+	void SetLookRate();
 
 private:
 	void FireLineCast(FName SocketName);
+	void CalculateCrosshairsSpread(float Deltatime);
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	bool GetAiming() const{ return bAiming;}
-
+	float GetCrosshairSpreadMultiplier() const;
 };

@@ -12,6 +12,8 @@
 
 // Sets default values
 APlayerCharacter::APlayerCharacter() :
+	HipTurnRate(45.f),HipLookUpRate(90.f),AimingTurnRate(20.f),AimingLookUpRate(20.f),
+	MouseHipTurnRate(1.0f),MouseHipLookUpRate(1.0f),MouseAimingTurnRate(0.2f),MouseAimingLookUpRate(0.2f),
 	//Valores por defecto de las variables
 	BaseTurnRate(45.f),BaseLookUpRate(45.f),CameraZoomedFOV(35.f),SpeedZoomed(20)
 {
@@ -85,6 +87,36 @@ void APlayerCharacter::LookAtRate(float Rate)
 {
 	//Añadiendo la rotacion horizontal a la camara
 	AddControllerPitchInput(Rate*BaseLookUpRate*GetWorld()->GetDeltaSeconds());
+}
+
+void APlayerCharacter::Turn(float Value)
+{
+	float TurnScaleFactor;
+
+	if(bAiming)
+	{
+		TurnScaleFactor = MouseAimingTurnRate;
+	}else
+	{
+		TurnScaleFactor = MouseHipTurnRate;
+	}
+	
+	AddControllerYawInput(Value*TurnScaleFactor);
+}
+
+void APlayerCharacter::LookUp(float Value)
+{
+	float TurnScaleFactor;
+
+	if(bAiming)
+	{
+		TurnScaleFactor = MouseAimingLookUpRate;
+	}else
+	{
+		TurnScaleFactor = MouseHipLookUpRate;
+	}
+	
+	AddControllerPitchInput(Value*TurnScaleFactor);
 }
 
 void APlayerCharacter::Fire()
@@ -168,11 +200,13 @@ bool APlayerCharacter::TraceUnderCrosshairs(FHitResult& OutHitResult, FVector& O
 void APlayerCharacter::AiminButtonPressed()
 {
 	bAiming = true;
+	SetLookRate();
 }
 
 void APlayerCharacter::AiminButtonReleased()
 {
 	bAiming = false;
+	SetLookRate();
 }
 
 void APlayerCharacter::CameraInterpZoom(float DeltaTime)
@@ -187,6 +221,19 @@ void APlayerCharacter::CameraInterpZoom(float DeltaTime)
 			CameraCurrentFOV = FMath::FInterpTo(CameraCurrentFOV,CameraDeafultFOV,DeltaTime,SpeedZoomed);
 		}
 		FollowCamera->SetFieldOfView(CameraCurrentFOV);
+	}
+}
+
+void APlayerCharacter::SetLookRate()
+{
+	if(bAiming)
+	{
+		BaseTurnRate = AimingTurnRate;
+		BaseLookUpRate = AimingLookUpRate;
+	}else
+	{
+		BaseTurnRate = HipTurnRate;
+		BaseLookUpRate = HipLookUpRate;
 	}
 }
 
@@ -241,12 +288,26 @@ void APlayerCharacter::FireLineCast(FName SocketName)
 	}
 }
 
+void APlayerCharacter::CalculateCrosshairsSpread(float Deltatime)
+{
+	FVector2D WalkSpreadRange(0.0f,600.0f);
+	FVector2D VelocityMultiplierRange = FVector2D(0.0f, 1.0f);
+	FVector Velocity = GetVelocity();
+	Velocity.Z = 0.0f;
+
+	CrosshairsVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpreadRange, VelocityMultiplierRange,Velocity.Size());
+
+	CrosshairsSpreadMultiplier = 0.5f + CrosshairsVelocityFactor;
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
 	CameraInterpZoom(DeltaTime);
+
+	CalculateCrosshairsSpread(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -261,8 +322,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("TurnRate",this,&APlayerCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUpRate",this,&APlayerCharacter::LookAtRate);
 	//Movimiento camara Raton
-	PlayerInputComponent->BindAxis("Turn",this,&APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp",this,&APawn::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn",this,&APlayerCharacter::Turn);
+	PlayerInputComponent->BindAxis("LookUp",this,&APlayerCharacter::LookUp);
 
 	//Salto del jugador
 	PlayerInputComponent->BindAction("Jump",IE_Pressed,this,&ACharacter::Jump);
@@ -273,5 +334,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("AiminButton",IE_Pressed,this,&APlayerCharacter::AiminButtonPressed);
 	PlayerInputComponent->BindAction("AiminButton",IE_Released,this,&APlayerCharacter::AiminButtonReleased);
 
+}
+
+float APlayerCharacter::GetCrosshairSpreadMultiplier() const
+{
+	return CrosshairsSpreadMultiplier;
 }
 
