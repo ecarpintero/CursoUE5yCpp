@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter() :
@@ -134,6 +135,8 @@ void APlayerCharacter::Fire()
 
 	FireLineCast("Fire_SockeL");
 	FireLineCast("Fire_SocketR");
+
+	StartCrosshairBulletFire();
 }
 
 bool APlayerCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult)
@@ -297,7 +300,39 @@ void APlayerCharacter::CalculateCrosshairsSpread(float Deltatime)
 
 	CrosshairsVelocityFactor = FMath::GetMappedRangeValueClamped(WalkSpreadRange, VelocityMultiplierRange,Velocity.Size());
 
-	CrosshairsSpreadMultiplier = 0.5f + CrosshairsVelocityFactor;
+	if (GetCharacterMovement()->IsFalling()) {
+		CrosshairsAirFactor = FMath::FInterpTo(CrosshairsAirFactor,2.25f,Deltatime,2.25f);
+	}
+	else {
+		CrosshairsAirFactor = FMath::FInterpTo(CrosshairsAirFactor,0.0f,Deltatime,30.f);
+	}
+
+	if (bAiming) {
+		CrosshairsInAimFactor = FMath::FInterpTo(CrosshairsInAimFactor, 0.6f, Deltatime, 30.0f);
+	}
+	else {
+		CrosshairsInAimFactor = FMath::FInterpTo(CrosshairsInAimFactor, 0.0f, Deltatime, 30.0f);
+	}
+
+	if (bFiringBullet) {
+		CrosshairsShootingFactor = FMath::FInterpTo(CrosshairsShootingFactor, 0.3f, Deltatime, 60.f);
+	}
+	else {
+		CrosshairsShootingFactor = FMath::FInterpTo(CrosshairsShootingFactor, 0.0f, Deltatime, 60.f);
+	}
+
+	CrosshairsSpreadMultiplier = 0.5f + CrosshairsVelocityFactor+CrosshairsAirFactor-CrosshairsInAimFactor+CrosshairsShootingFactor;
+}
+
+void APlayerCharacter::StartCrosshairBulletFire()
+{
+	bFiringBullet = true;
+	GetWorldTimerManager().SetTimer(CrossHairTimeHandle, this, &APlayerCharacter::FinishCrosshairBulletFire, 0.05f);
+}
+
+void APlayerCharacter::FinishCrosshairBulletFire()
+{
+	bFiringBullet = false;
 }
 
 // Called every frame

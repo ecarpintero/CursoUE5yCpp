@@ -75,6 +75,10 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Crosshair, meta = (AllowPrivateAccess = "true"))
 	float CrosshairsShootingFactor;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	bool bFiringBullet;
+	FTimerHandle CrossHairTimeHandle;
+
 public:
 	// Constructor
 	APlayerCharacter();
@@ -108,6 +112,10 @@ protected:
 private:
 	void FireLineCast(FName SocketName);
 	void CalculateCrosshairsSpread(float Deltatime);
+
+	void StartCrosshairBulletFire();
+	void FinishCrosshairBulletFire();
+
 
 public:	
 	// Called every frame
