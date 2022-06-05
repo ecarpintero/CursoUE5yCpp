@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Sound/SoundCue.h"
+#include "Camera/CameraShake.h"
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -78,6 +79,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	bool bFiringBullet;
 	FTimerHandle CrossHairTimeHandle;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UMatineeCameraShake> ShooterCameraShake;
 
 public:
 	// Constructor

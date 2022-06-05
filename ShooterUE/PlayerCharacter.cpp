@@ -137,6 +137,14 @@ void APlayerCharacter::Fire()
 	FireLineCast("Fire_SocketR");
 
 	StartCrosshairBulletFire();
+
+	if (ShooterCameraShake) {
+		UMatineeCameraShake::StartMatineeCameraShake(GetWorld()->GetFirstPlayerController()->PlayerCameraManager,
+			ShooterCameraShake,
+			1.0f,
+			ECameraShakePlaySpace::CameraLocal,
+			FRotator::ZeroRotator);
+	}
 }
 
 bool APlayerCharacter::GetBeamEndLocation(const FVector& MuzzleSocketLocation, FHitResult& OutHitResult)
